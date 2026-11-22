@@ -1,20 +1,19 @@
-# Simulação de base de dados no servidor
-LIVROS_DB = [
-    {"id": 1, "titulo": "O Hobbit", "autor": "J.R.R. Tolkien", "genero": "Fantasia", "preco": 45.0, "estoque": 3},
-    {"id": 2, "titulo": "1984", "autor": "George Orwell", "genero": "Ficção", "preco": 30.0, "estoque": 5},
-    {"id": 3, "titulo": "Senhor dos Anéis", "autor": "J.R.R. Tolkien", "genero": "Fantasia", "preco": 60.0, "estoque": 1},
-]
+
+from config import colecao_livros
 
 
 def buscar_livros(genero=None):
-    if not genero:
-        return LIVROS_DB
-    return [l for l in LIVROS_DB if l["genero"].lower() == genero.lower()]
+    filtro = {}
+    if genero:
+        filtro["genero"] = {"$regex": f"^{genero}$", "$options": "i"}
+
+    livros = list(colecao_livros.find(filtro, {"_id": 0}))
+    return livros
 
 
 def buscar_por_id(livro_id):
-    return next((l for l in LIVROS_DB if l["id"] == livro_id), None)
+    return colecao_livros.find_one({"id": livro_id}, {"_id": 0})
 
 
 def listar_generos():
-    return sorted({l["genero"] for l in LIVROS_DB})
+    return sorted(colecao_livros.distinct("genero"))
